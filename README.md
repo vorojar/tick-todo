@@ -8,7 +8,7 @@ Lightweight sidebar todo manager for VS Code.
 - Subtasks support with progress indicator `[1/3]`
 - Badge notification on the activity bar icon
 - Edit, complete, and delete items inline
-- Data stored in `~/.claude/todo.json` (portable, plain JSON)
+- Data stored in `~/.tick-todo/todo.json` (portable, plain JSON)
 
 ## Usage
 
@@ -26,4 +26,4 @@ When all subtasks are completed, the parent task is automatically marked as done
 
 ## Data
 
-All todos are stored in `~/.claude/todo.json` as plain JSON. You can edit this file directly or share it across tools.
+All todos are stored in `~/.tick-todo/todo.json` as plain JSON. You can edit this file directly or share it across tools.

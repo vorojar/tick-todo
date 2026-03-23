@@ -21,7 +21,7 @@ export class TodoStore extends EventEmitter {
 
   constructor() {
     super();
-    this.filePath = path.join(os.homedir(), ".claude", "todo.json");
+    this.filePath = path.join(os.homedir(), ".tick-todo", "todo.json");
   }
 
   start(): void {
