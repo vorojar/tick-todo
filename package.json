@@ -1,0 +1,116 @@
+{
+  "name": "tick-todo",
+  "displayName": "Tick Todo",
+  "description": "Lightweight sidebar todo manager with subtasks and badge notifications.",
+  "version": "0.7.0",
+  "publisher": "longjiewu",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "icon": "icon.png",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "clitodo",
+          "title": "Tick Todo",
+          "icon": "$(checklist)"
+        }
+      ]
+    },
+    "views": {
+      "clitodo": [
+        {
+          "id": "clitodo.pending",
+          "name": "待办事项"
+        },
+        {
+          "id": "clitodo.done",
+          "name": "已完成"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "clitodo.add",
+        "title": "添加待办",
+        "icon": "$(add)"
+      },
+      {
+        "command": "clitodo.addChild",
+        "title": "添加子任务",
+        "icon": "$(add)"
+      },
+      {
+        "command": "clitodo.done",
+        "title": "完成",
+        "icon": "$(check)"
+      },
+      {
+        "command": "clitodo.remove",
+        "title": "删除",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "clitodo.edit",
+        "title": "编辑",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "clitodo.refresh",
+        "title": "刷新",
+        "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "clitodo.add",
+          "when": "view == clitodo.pending",
+          "group": "navigation"
+        },
+        {
+          "command": "clitodo.refresh",
+          "when": "view == clitodo.pending || view == clitodo.done",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "clitodo.addChild",
+          "when": "view == clitodo.pending && viewItem == pending",
+          "group": "inline@0"
+        },
+        {
+          "command": "clitodo.edit",
+          "when": "view == clitodo.pending",
+          "group": "1_actions"
+        },
+        {
+          "command": "clitodo.done",
+          "when": "view == clitodo.pending",
+          "group": "inline@1"
+        },
+        {
+          "command": "clitodo.remove",
+          "when": "view == clitodo.pending || view == clitodo.done",
+          "group": "inline@2"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -watch",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0",
+    "@vscode/vsce": "^3.0.0"
+  }
+}
