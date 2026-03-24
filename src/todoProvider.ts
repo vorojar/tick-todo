@@ -72,6 +72,7 @@ export class PendingProvider
       const parentIndex = pending.findIndex(
         (i) => i.text === parent.text && i.createdAt === parent.createdAt
       );
+
       const ti = new vscode.TreeItem(
         `${parentIndex + 1}.${childIndex + 1} ${item.text}`
       );

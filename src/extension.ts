@@ -105,12 +105,23 @@ export function activate(context: vscode.ExtensionContext) {
       refreshAll();
     }),
 
-    vscode.commands.registerCommand("clitodo.remove", (node: TodoNode) => {
+    vscode.commands.registerCommand("clitodo.remove", async (node: TodoNode) => {
+      const confirm = await vscode.window.showWarningMessage(
+        `确定删除「${node.item.text}」？`,
+        { modal: true },
+        "删除"
+      );
+      if (confirm !== "删除") return;
       if (node.parent) {
         store.removeChild(node.parent, node.item);
       } else {
         store.remove(node.item);
       }
+      refreshAll();
+    }),
+
+    vscode.commands.registerCommand("clitodo.undone", (node: TodoNode) => {
+      store.undone(node.item);
       refreshAll();
     }),
 

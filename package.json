@@ -2,7 +2,7 @@
   "name": "tick-todo",
   "displayName": "Tick Todo",
   "description": "Lightweight sidebar todo manager with subtasks and badge notifications.",
-  "version": "0.20.0",
+  "version": "0.25.0",
   "publisher": "longjiewu",
   "engines": {
     "vscode": "^1.85.0"
@@ -53,6 +53,11 @@
         "command": "clitodo.remove",
         "title": "删除",
         "icon": "$(trash)"
+      },
+      {
+        "command": "clitodo.undone",
+        "title": "撤销完成",
+        "icon": "$(discard)"
       },
       {
         "command": "clitodo.edit",
@@ -128,6 +133,11 @@
         {
           "command": "clitodo.done",
           "when": "view == clitodo.pending",
+          "group": "inline@1"
+        },
+        {
+          "command": "clitodo.undone",
+          "when": "view == clitodo.done",
           "group": "inline@1"
         },
         {

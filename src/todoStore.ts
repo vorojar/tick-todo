@@ -290,6 +290,32 @@ export class TodoStore extends EventEmitter {
     this.write(data);
   }
 
+  undone(item: TodoItem): void {
+    const data = this.read();
+    const target = data.items.find(
+      (i) => i.text === item.text && i.createdAt === item.createdAt
+    );
+    if (target) {
+      target.done = false;
+      delete target.doneAt;
+    }
+    // Also check children
+    for (const parent of data.items) {
+      for (const child of parent.children ?? []) {
+        if (child.text === item.text && child.createdAt === item.createdAt) {
+          child.done = false;
+          delete child.doneAt;
+          // Also undone parent if it was auto-completed
+          if (parent.done) {
+            parent.done = false;
+            delete parent.doneAt;
+          }
+        }
+      }
+    }
+    this.write(data);
+  }
+
   setPriority(item: TodoItem, priority: Priority): void {
     const data = this.read();
     const target = this.findItem(data, item);
