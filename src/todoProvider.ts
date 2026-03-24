@@ -78,7 +78,7 @@ export class PendingProvider
           `${parentIndex + 1}.${childIndex + 1} ${item.text}`
         );
         ti.contextValue = "done-child";
-        ti.iconPath = new vscode.ThemeIcon("check");
+        ti.iconPath = new vscode.ThemeIcon("circle-filled", new vscode.ThemeColor("disabledForeground"));
         return ti;
       }
 
