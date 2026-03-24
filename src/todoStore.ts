@@ -3,10 +3,13 @@ import * as path from "path";
 import * as os from "os";
 import { EventEmitter } from "events";
 
+export type Priority = "high" | "medium" | "low" | "none";
+
 export interface TodoItem {
   id?: string;
   text: string;
   done: boolean;
+  priority?: Priority;
   createdAt: string;
   doneAt?: string;
   children?: TodoItem[];
@@ -51,6 +54,17 @@ export class TodoStore extends EventEmitter {
   getNotePath(item: TodoItem): string {
     const id = this.ensureId(item);
     return path.join(this.notesDir, `${id}.md`);
+  }
+
+  /** 读取笔记内容（去掉标题行），无内容返回空字符串 */
+  getNoteContent(item: TodoItem): string {
+    const notePath = this.getNotePath(item);
+    if (!fs.existsSync(notePath)) return "";
+    const raw = fs.readFileSync(notePath, "utf-8");
+    // 去掉第一行标题和前后空白
+    const lines = raw.split("\n");
+    const body = lines.filter((l) => !l.startsWith("# ")).join("\n").trim();
+    return body;
   }
 
   private ensureId(item: TodoItem): string {
@@ -273,6 +287,15 @@ export class TodoStore extends EventEmitter {
     data.items = data.items.filter(
       (i) => !(i.text === item.text && i.createdAt === item.createdAt)
     );
+    this.write(data);
+  }
+
+  setPriority(item: TodoItem, priority: Priority): void {
+    const data = this.read();
+    const target = this.findItem(data, item);
+    if (target) {
+      target.priority = priority === "none" ? undefined : priority;
+    }
     this.write(data);
   }
 

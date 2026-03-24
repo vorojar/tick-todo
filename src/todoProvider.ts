@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { TodoItem, TodoStore } from "./todoStore";
+import { TodoItem, TodoStore, Priority } from "./todoStore";
 
 /** 用于 TreeView 的节点，包含父项引用信息 */
 export interface TodoNode {
@@ -8,6 +8,19 @@ export interface TodoNode {
 }
 
 const MIME_TYPE = "application/vnd.code.tree.clitodo.pending";
+
+function getPriorityIcon(priority?: Priority): vscode.ThemeIcon {
+  switch (priority) {
+    case "high":
+      return new vscode.ThemeIcon("circle-filled", new vscode.ThemeColor("charts.red"));
+    case "medium":
+      return new vscode.ThemeIcon("circle-filled", new vscode.ThemeColor("charts.yellow"));
+    case "low":
+      return new vscode.ThemeIcon("circle-filled", new vscode.ThemeColor("charts.blue"));
+    default:
+      return new vscode.ThemeIcon("circle-outline");
+  }
+}
 
 export class PendingProvider
   implements vscode.TreeDataProvider<TodoNode>, vscode.TreeDragAndDropController<TodoNode>
@@ -46,8 +59,9 @@ export class PendingProvider
           : vscode.TreeItemCollapsibleState.None
       );
       ti.contextValue = "pending";
-      ti.iconPath = new vscode.ThemeIcon("circle-outline");
+      ti.iconPath = getPriorityIcon(item.priority);
       ti.command = { command: "clitodo.openNote", title: "打开笔记", arguments: [node] };
+      this.applyNote(ti, item);
       return ti;
     } else {
       const pendingChildren = this.store.getPendingChildren(parent);
@@ -62,9 +76,20 @@ export class PendingProvider
         `${parentIndex + 1}.${childIndex + 1} ${item.text}`
       );
       ti.contextValue = "pending-child";
-      ti.iconPath = new vscode.ThemeIcon("circle-outline");
+      ti.iconPath = getPriorityIcon(item.priority);
       ti.command = { command: "clitodo.openNote", title: "打开笔记", arguments: [node] };
+      this.applyNote(ti, item);
       return ti;
+    }
+  }
+
+  private applyNote(ti: vscode.TreeItem, item: TodoItem): void {
+    const content = this.store.getNoteContent(item);
+    if (content) {
+      ti.description = "☰";
+      const md = new vscode.MarkdownString(content);
+      md.supportHtml = true;
+      ti.tooltip = md;
     }
   }
 
@@ -89,15 +114,12 @@ export class PendingProvider
     if (!raw) return;
     const source: TodoNode = raw.value;
 
-    // 只支持同级拖拽：顶级之间、同父子项之间
     if (!source.parent && !target?.parent) {
-      // 顶级项排序
       this.store.moveItem(source.item, target?.item);
     } else if (
       source.parent && target?.parent &&
       source.parent.createdAt === target.parent.createdAt
     ) {
-      // 同父项下子项排序
       this.store.moveChild(source.parent, source.item, target.item);
     }
     this.refresh();

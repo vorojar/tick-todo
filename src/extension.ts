@@ -122,6 +122,19 @@ export function activate(context: vscode.ExtensionContext) {
       vscode.window.showTextDocument(vscode.Uri.file(notePath));
     }),
 
+    vscode.commands.registerCommand("clitodo.priorityHigh", (node: TodoNode) => {
+      store.setPriority(node.item, "high"); refreshAll();
+    }),
+    vscode.commands.registerCommand("clitodo.priorityMedium", (node: TodoNode) => {
+      store.setPriority(node.item, "medium"); refreshAll();
+    }),
+    vscode.commands.registerCommand("clitodo.priorityLow", (node: TodoNode) => {
+      store.setPriority(node.item, "low"); refreshAll();
+    }),
+    vscode.commands.registerCommand("clitodo.priorityNone", (node: TodoNode) => {
+      store.setPriority(node.item, "none"); refreshAll();
+    }),
+
     vscode.commands.registerCommand("clitodo.refresh", refreshAll),
 
     { dispose: () => store.stop() }

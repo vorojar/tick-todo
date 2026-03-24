@@ -2,7 +2,7 @@
   "name": "tick-todo",
   "displayName": "Tick Todo",
   "description": "Lightweight sidebar todo manager with subtasks and badge notifications.",
-  "version": "0.10.0",
+  "version": "0.20.0",
   "publisher": "longjiewu",
   "engines": {
     "vscode": "^1.85.0"
@@ -60,6 +60,22 @@
         "icon": "$(edit)"
       },
       {
+        "command": "clitodo.priorityHigh",
+        "title": "高优先级"
+      },
+      {
+        "command": "clitodo.priorityMedium",
+        "title": "中优先级"
+      },
+      {
+        "command": "clitodo.priorityLow",
+        "title": "低优先级"
+      },
+      {
+        "command": "clitodo.priorityNone",
+        "title": "无优先级"
+      },
+      {
         "command": "clitodo.refresh",
         "title": "刷新",
         "icon": "$(refresh)"
@@ -85,9 +101,29 @@
           "group": "inline@0"
         },
         {
+          "command": "clitodo.priorityHigh",
+          "when": "view == clitodo.pending",
+          "group": "2_priority@1"
+        },
+        {
+          "command": "clitodo.priorityMedium",
+          "when": "view == clitodo.pending",
+          "group": "2_priority@2"
+        },
+        {
+          "command": "clitodo.priorityLow",
+          "when": "view == clitodo.pending",
+          "group": "2_priority@3"
+        },
+        {
+          "command": "clitodo.priorityNone",
+          "when": "view == clitodo.pending",
+          "group": "2_priority@4"
+        },
+        {
           "command": "clitodo.edit",
           "when": "view == clitodo.pending",
-          "group": "1_actions"
+          "group": "1_actions@2"
         },
         {
           "command": "clitodo.done",
