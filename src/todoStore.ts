@@ -4,6 +4,7 @@ import * as os from "os";
 import { EventEmitter } from "events";
 
 export interface TodoItem {
+  id?: string;
   text: string;
   done: boolean;
   createdAt: string;
@@ -39,6 +40,41 @@ export class TodoStore extends EventEmitter {
     this.watcher = null;
   }
 
+  private generateId(): string {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  }
+
+  get notesDir(): string {
+    return path.join(path.dirname(this.filePath), "notes");
+  }
+
+  getNotePath(item: TodoItem): string {
+    const id = this.ensureId(item);
+    return path.join(this.notesDir, `${id}.md`);
+  }
+
+  private ensureId(item: TodoItem): string {
+    if (item.id) return item.id;
+    // 给没有 id 的旧数据补上
+    const data = this.read();
+    const target = this.findItem(data, item);
+    if (target && !target.id) {
+      target.id = this.generateId();
+      this.write(data);
+    }
+    return target?.id ?? this.generateId();
+  }
+
+  private findItem(data: TodoData, item: TodoItem): TodoItem | undefined {
+    for (const i of data.items) {
+      if (i.text === item.text && i.createdAt === item.createdAt) return i;
+      for (const c of i.children ?? []) {
+        if (c.text === item.text && c.createdAt === item.createdAt) return c;
+      }
+    }
+    return undefined;
+  }
+
   private ensureFile(): void {
     const dir = path.dirname(this.filePath);
     if (!fs.existsSync(dir)) {
@@ -46,6 +82,9 @@ export class TodoStore extends EventEmitter {
     }
     if (!fs.existsSync(this.filePath)) {
       fs.writeFileSync(this.filePath, JSON.stringify({ items: [] }, null, 2));
+    }
+    if (!fs.existsSync(this.notesDir)) {
+      fs.mkdirSync(this.notesDir, { recursive: true });
     }
   }
 
@@ -110,7 +149,7 @@ export class TodoStore extends EventEmitter {
 
   add(text: string): void {
     const data = this.read();
-    data.items.push({ text, done: false, createdAt: new Date().toISOString() });
+    data.items.push({ id: this.generateId(), text, done: false, createdAt: new Date().toISOString() });
     this.write(data);
   }
 
@@ -121,6 +160,7 @@ export class TodoStore extends EventEmitter {
     const parent = pending[parentIndex];
     if (!parent.children) parent.children = [];
     parent.children.push({
+      id: this.generateId(),
       text,
       done: false,
       createdAt: new Date().toISOString(),

@@ -41,6 +41,7 @@ export class PendingProvider implements vscode.TreeDataProvider<TodoNode> {
       );
       ti.contextValue = "pending";
       ti.iconPath = new vscode.ThemeIcon("circle-outline");
+      ti.command = { command: "clitodo.openNote", title: "打开笔记", arguments: [node] };
       return ti;
     } else {
       // 子项
@@ -57,6 +58,7 @@ export class PendingProvider implements vscode.TreeDataProvider<TodoNode> {
       );
       ti.contextValue = "pending-child";
       ti.iconPath = new vscode.ThemeIcon("circle-outline");
+      ti.command = { command: "clitodo.openNote", title: "打开笔记", arguments: [node] };
       return ti;
     }
   }

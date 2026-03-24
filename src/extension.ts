@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as fs from "fs";
 import { TodoStore } from "./todoStore";
 import { TodoNode, PendingProvider, DoneProvider } from "./todoProvider";
 
@@ -110,6 +111,14 @@ export function activate(context: vscode.ExtensionContext) {
         store.remove(node.item);
       }
       refreshAll();
+    }),
+
+    vscode.commands.registerCommand("clitodo.openNote", (node: TodoNode) => {
+      const notePath = store.getNotePath(node.item);
+      if (!fs.existsSync(notePath)) {
+        fs.writeFileSync(notePath, `# ${node.item.text}\n\n`);
+      }
+      vscode.window.showTextDocument(vscode.Uri.file(notePath));
     }),
 
     vscode.commands.registerCommand("clitodo.refresh", refreshAll),
