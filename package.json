@@ -2,7 +2,7 @@
   "name": "tick-todo",
   "displayName": "Tick Todo",
   "description": "Lightweight sidebar todo manager with subtasks and badge notifications.",
-  "version": "0.25.0",
+  "version": "0.29.0",
   "publisher": "longjiewu",
   "engines": {
     "vscode": "^1.85.0"
@@ -132,12 +132,12 @@
         },
         {
           "command": "clitodo.done",
-          "when": "view == clitodo.pending",
+          "when": "view == clitodo.pending && viewItem != done-child",
           "group": "inline@1"
         },
         {
           "command": "clitodo.undone",
-          "when": "view == clitodo.done",
+          "when": "view == clitodo.done || viewItem == done-child",
           "group": "inline@1"
         },
         {

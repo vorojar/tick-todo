@@ -131,21 +131,13 @@ export class TodoStore extends EventEmitter {
   }
 
   getDone(): TodoItem[] {
-    const data = this.read();
-    const doneItems: TodoItem[] = [];
-    for (const item of data.items) {
-      if (item.done) {
-        doneItems.push(item);
-      }
-      for (const child of item.children ?? []) {
-        if (child.done) {
-          doneItems.push(child);
-        }
-      }
-    }
-    return doneItems.sort((a, b) =>
-      (b.doneAt ?? "").localeCompare(a.doneAt ?? "")
-    );
+    return this.read().items.filter((i) => i.done)
+      .sort((a, b) => (b.doneAt ?? "").localeCompare(a.doneAt ?? ""));
+  }
+
+  getDoneChildren(parent: TodoItem): TodoItem[] {
+    return (parent.children ?? []).filter((c) => c.done)
+      .sort((a, b) => (b.doneAt ?? "").localeCompare(a.doneAt ?? ""));
   }
 
   getPendingChildren(parent: TodoItem): TodoItem[] {

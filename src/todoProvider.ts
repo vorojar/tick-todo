@@ -51,7 +51,7 @@ export class PendingProvider
           ? `${index + 1}. ${item.text} [${progress.done}/${progress.total}]`
           : `${index + 1}. ${item.text}`;
 
-      const hasChildren = (item.children ?? []).some((c) => !c.done);
+      const hasChildren = (item.children ?? []).length > 0;
       const ti = new vscode.TreeItem(
         label,
         hasChildren
@@ -64,14 +64,23 @@ export class PendingProvider
       this.applyNote(ti, item);
       return ti;
     } else {
-      const pendingChildren = this.store.getPendingChildren(parent);
-      const childIndex = pendingChildren.findIndex(
+      const allChildren = parent.children ?? [];
+      const childIndex = allChildren.findIndex(
         (c) => c.text === item.text && c.createdAt === item.createdAt
       );
       const pending = this.store.getPending();
       const parentIndex = pending.findIndex(
         (i) => i.text === parent.text && i.createdAt === parent.createdAt
       );
+
+      if (item.done) {
+        const ti = new vscode.TreeItem(
+          `${parentIndex + 1}.${childIndex + 1} ${item.text}`
+        );
+        ti.contextValue = "done-child";
+        ti.iconPath = new vscode.ThemeIcon("check");
+        return ti;
+      }
 
       const ti = new vscode.TreeItem(
         `${parentIndex + 1}.${childIndex + 1} ${item.text}`
@@ -99,8 +108,7 @@ export class PendingProvider
       return this.store.getPending().map((item) => ({ item }));
     }
     if (!node.parent) {
-      return this.store
-        .getPendingChildren(node.item)
+      return (node.item.children ?? [])
         .map((child) => ({ item: child, parent: node.item }));
     }
     return [];
@@ -137,20 +145,40 @@ export class DoneProvider implements vscode.TreeDataProvider<TodoNode> {
     this._onDidChange.fire();
   }
 
-  getTreeItem(node: TodoNode): vscode.TreeItem {
-    const { item } = node;
-    const date = item.doneAt ? new Date(item.doneAt) : new Date();
+  private formatDate(dateStr?: string): string {
+    const date = dateStr ? new Date(dateStr) : new Date();
     const mm = String(date.getMonth() + 1).padStart(2, "0");
     const dd = String(date.getDate()).padStart(2, "0");
     const hh = String(date.getHours()).padStart(2, "0");
     const min = String(date.getMinutes()).padStart(2, "0");
-    const ti = new vscode.TreeItem(`${item.text}  (${mm}-${dd} ${hh}:${min})`);
+    return `${mm}-${dd} ${hh}:${min}`;
+  }
+
+  getTreeItem(node: TodoNode): vscode.TreeItem {
+    const { item } = node;
+    const dateStr = this.formatDate(item.doneAt);
+    const doneChildren = this.store.getDoneChildren(item);
+    const hasChildren = !node.parent && doneChildren.length > 0;
+
+    const ti = new vscode.TreeItem(
+      `${item.text}  (${dateStr})`,
+      hasChildren
+        ? vscode.TreeItemCollapsibleState.Collapsed
+        : vscode.TreeItemCollapsibleState.None
+    );
     ti.contextValue = "done";
     ti.iconPath = new vscode.ThemeIcon("check");
     return ti;
   }
 
-  getChildren(): TodoNode[] {
-    return this.store.getDone().map((item) => ({ item }));
+  getChildren(node?: TodoNode): TodoNode[] {
+    if (!node) {
+      return this.store.getDone().map((item) => ({ item }));
+    }
+    if (!node.parent) {
+      return this.store.getDoneChildren(node.item)
+        .map((child) => ({ item: child, parent: node.item }));
+    }
+    return [];
   }
 }
