@@ -12,6 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   const pendingView = vscode.window.createTreeView("clitodo.pending", {
     treeDataProvider: pendingProvider,
+    dragAndDropController: pendingProvider,
   });
   vscode.window.createTreeView("clitodo.done", {
     treeDataProvider: doneProvider,

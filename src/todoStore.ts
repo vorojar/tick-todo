@@ -228,6 +228,46 @@ export class TodoStore extends EventEmitter {
     this.write(data);
   }
 
+  moveItem(item: TodoItem, beforeItem?: TodoItem): void {
+    const data = this.read();
+    const idx = data.items.findIndex(
+      (i) => i.text === item.text && i.createdAt === item.createdAt
+    );
+    if (idx < 0) return;
+    const [removed] = data.items.splice(idx, 1);
+    if (!beforeItem) {
+      data.items.push(removed);
+    } else {
+      const targetIdx = data.items.findIndex(
+        (i) => i.text === beforeItem.text && i.createdAt === beforeItem.createdAt
+      );
+      data.items.splice(targetIdx >= 0 ? targetIdx : data.items.length, 0, removed);
+    }
+    this.write(data);
+  }
+
+  moveChild(parent: TodoItem, child: TodoItem, beforeChild?: TodoItem): void {
+    const data = this.read();
+    const p = data.items.find(
+      (i) => i.text === parent.text && i.createdAt === parent.createdAt
+    );
+    if (!p?.children) return;
+    const idx = p.children.findIndex(
+      (c) => c.text === child.text && c.createdAt === child.createdAt
+    );
+    if (idx < 0) return;
+    const [removed] = p.children.splice(idx, 1);
+    if (!beforeChild) {
+      p.children.push(removed);
+    } else {
+      const targetIdx = p.children.findIndex(
+        (c) => c.text === beforeChild.text && c.createdAt === beforeChild.createdAt
+      );
+      p.children.splice(targetIdx >= 0 ? targetIdx : p.children.length, 0, removed);
+    }
+    this.write(data);
+  }
+
   remove(item: TodoItem): void {
     const data = this.read();
     data.items = data.items.filter(

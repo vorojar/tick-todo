@@ -2,7 +2,7 @@
   "name": "tick-todo",
   "displayName": "Tick Todo",
   "description": "Lightweight sidebar todo manager with subtasks and badge notifications.",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "publisher": "longjiewu",
   "engines": {
     "vscode": "^1.85.0"

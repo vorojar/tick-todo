@@ -7,9 +7,16 @@ export interface TodoNode {
   parent?: TodoItem;
 }
 
-export class PendingProvider implements vscode.TreeDataProvider<TodoNode> {
+const MIME_TYPE = "application/vnd.code.tree.clitodo.pending";
+
+export class PendingProvider
+  implements vscode.TreeDataProvider<TodoNode>, vscode.TreeDragAndDropController<TodoNode>
+{
   private _onDidChange = new vscode.EventEmitter<void>();
   readonly onDidChangeTreeData = this._onDidChange.event;
+
+  readonly dropMimeTypes = [MIME_TYPE];
+  readonly dragMimeTypes = [MIME_TYPE];
 
   constructor(private store: TodoStore) {}
 
@@ -21,7 +28,6 @@ export class PendingProvider implements vscode.TreeDataProvider<TodoNode> {
     const { item, parent } = node;
 
     if (!parent) {
-      // 顶级项
       const pending = this.store.getPending();
       const index = pending.findIndex(
         (i) => i.text === item.text && i.createdAt === item.createdAt
@@ -44,7 +50,6 @@ export class PendingProvider implements vscode.TreeDataProvider<TodoNode> {
       ti.command = { command: "clitodo.openNote", title: "打开笔记", arguments: [node] };
       return ti;
     } else {
-      // 子项
       const pendingChildren = this.store.getPendingChildren(parent);
       const childIndex = pendingChildren.findIndex(
         (c) => c.text === item.text && c.createdAt === item.createdAt
@@ -73,6 +78,29 @@ export class PendingProvider implements vscode.TreeDataProvider<TodoNode> {
         .map((child) => ({ item: child, parent: node.item }));
     }
     return [];
+  }
+
+  handleDrag(source: readonly TodoNode[], dataTransfer: vscode.DataTransfer): void {
+    dataTransfer.set(MIME_TYPE, new vscode.DataTransferItem(source[0]));
+  }
+
+  handleDrop(target: TodoNode | undefined, dataTransfer: vscode.DataTransfer): void {
+    const raw = dataTransfer.get(MIME_TYPE);
+    if (!raw) return;
+    const source: TodoNode = raw.value;
+
+    // 只支持同级拖拽：顶级之间、同父子项之间
+    if (!source.parent && !target?.parent) {
+      // 顶级项排序
+      this.store.moveItem(source.item, target?.item);
+    } else if (
+      source.parent && target?.parent &&
+      source.parent.createdAt === target.parent.createdAt
+    ) {
+      // 同父项下子项排序
+      this.store.moveChild(source.parent, source.item, target.item);
+    }
+    this.refresh();
   }
 }
 
